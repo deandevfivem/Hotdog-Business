@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'hotdog_business'
-author 'Dean'
+author 'DeanoDevTeam'
 description 'Hotdog Business System'
 version '2.0.0'
 
@@ -23,4 +23,5 @@ dependencies {
     'ox_lib',
     'ox_inventory',
     'Renewed-Banking'
+
 }
