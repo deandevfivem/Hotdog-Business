@@ -1,0 +1,47 @@
+    ['bread'] = {
+        label = 'Bread',
+        weight = 100,
+        client = {
+            status = { hunger = 0 },
+            anim = 'pickup',
+            prop = 'prop_food_bun_01',
+            usetime = 0,
+            notification = 'You grabbed a slice of bread'
+        }
+    },
+
+    ['sausage'] = {
+        label = 'Raw Sausage',
+        weight = 200,
+        client = {
+            status = { hunger = 0 },
+            anim = 'pickup',
+            prop = 'prop_sausage_01',
+            usetime = 0,
+            notification = 'You grabbed a raw sausage'
+        }
+    },
+
+    ['cooked_sausage'] = {
+        label = 'Cooked Sausage',
+        weight = 200,
+        client = {
+            status = { hunger = 10000 },
+            anim = 'eating',
+            prop = 'prop_sausage_01',
+            usetime = 2500,
+            notification = 'You cooked a sausage'
+        }
+    },
+
+    ['hotdog'] = {
+        label = 'Hotdog',
+        weight = 300,
+        client = {
+            status = { hunger = 200000 },
+            anim = 'eating',
+            prop = 'prop_cs_hotdog_01',
+            usetime = 2500,
+            notification = 'You ate a delicious hotdog'
+        }
+    },
