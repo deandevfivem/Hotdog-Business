@@ -1,90 +1,98 @@
 local orders = {}
 local orderId = 0
 
+-- REGISTER STASH
 CreateThread(function()
-
     exports.ox_inventory:RegisterStash(
         'hotdog_stash',
         'Hotdog Storage',
-        150,
-        500000
+        100,
+        200000
     )
-
 end)
 
 -- CREATE ORDER
 RegisterNetEvent('hotdog:createOrder', function(items)
-
     local src = source
-    local name = GetPlayerName(src)
 
-    local total = (
-        (items.hotdog * 10000) +
-        (items.water * 5000) +
-        (items.sprunk * 5000) +
-        (items.coffee * 6000)
-    )
+    local prices = {
+        hotdog = 10,
+        water = 5,
+        sprunk = 5,
+        coffee = 7
+    }
 
-    if total <= 0 then return end
+    local total = 0
 
-    if not exports.ox_inventory:RemoveItem(src,'money',total) then
+    for _,item in pairs(items) do
+        total = total + prices[item]
+    end
+
+    -- TAKE CASH
+    local removed = exports.ox_inventory:RemoveItem(src,'money',total)
+
+    if not removed then
         TriggerClientEvent('ox_lib:notify',src,{
+            title='Hotdog Stand',
             description='Not enough cash',
             type='error'
         })
         return
     end
 
+    -- ADD TO BUSINESS ACCOUNT
+    exports['Renewed-Banking']:addAccountMoney('hotdog', total)
+
     orderId += 1
 
     orders[#orders+1] = {
         id = orderId,
+        items = items,
         player = src,
-        name = name,
-        items = items
+        name = GetPlayerName(src)
     }
 
+    -- NOTIFY CUSTOMER
     TriggerClientEvent('ox_lib:notify',src,{
-        description='Order placed!',
+        title='Order Placed',
+        description='Your order #'..orderId..' has been placed',
         type='success'
     })
 
-    TriggerClientEvent('hotdog:newOrderSound',-1)
-
+    -- SOUND FOR WORKERS
+    TriggerClientEvent('hotdog:newOrderSound', -1)
 end)
 
--- GET ORDERS
-RegisterNetEvent('hotdog:getOrders', function()
-
-    TriggerClientEvent('hotdog:openTablet', source, orders)
-
+-- SEND TABLET DATA
+RegisterNetEvent('hotdog:requestTabletData', function()
+    local src = source
+    TriggerClientEvent('hotdog:openTabletMenu', src, orders)
 end)
 
 -- COMPLETE ORDER
-RegisterNetEvent('hotdog:completeOrder', function(id)
+RegisterNetEvent('hotdog:fulfillOrder', function(id)
+    local src = source
 
     for k,v in pairs(orders) do
-
         if v.id == id then
 
             local player = v.player
 
-            if v.items.hotdog > 0 then
-                exports.ox_inventory:AddItem(player,'hotdog',v.items.hotdog)
+            for _,item in pairs(v.items) do
+
+                if item == "hotdog" then
+                    exports.ox_inventory:AddItem(player,'hotdog',1)
+                elseif item == "water" then
+                    exports.ox_inventory:AddItem(player,'water',1)
+                elseif item == "sprunk" then
+                    exports.ox_inventory:AddItem(player,'sprunk',1)
+                elseif item == "coffee" then
+                    exports.ox_inventory:AddItem(player,'coffee',1)
+                end
+
             end
 
-            if v.items.water > 0 then
-                exports.ox_inventory:AddItem(player,'water',v.items.water)
-            end
-
-            if v.items.sprunk > 0 then
-                exports.ox_inventory:AddItem(player,'sprunk',v.items.sprunk)
-            end
-
-            if v.items.coffee > 0 then
-                exports.ox_inventory:AddItem(player,'coffee',v.items.coffee)
-            end
-
+            -- CUSTOMER NOTIFICATION
             TriggerClientEvent('ox_lib:notify',player,{
                 title='Hotdog Stand',
                 description='Your order is ready!',
@@ -94,25 +102,26 @@ RegisterNetEvent('hotdog:completeOrder', function(id)
             table.remove(orders,k)
             break
         end
-
     end
-
 end)
 
--- COOK
+-- COOK SAUSAGE
 RegisterNetEvent('hotdog:cookSausage', function()
-
     local src = source
 
     if exports.ox_inventory:RemoveItem(src,'sausage',1) then
         exports.ox_inventory:AddItem(src,'cooked_sausage',1)
+    else
+        TriggerClientEvent('ox_lib:notify',src,{
+            title='Cooking',
+            description='You need raw sausage',
+            type='error'
+        })
     end
-
 end)
 
--- ASSEMBLE
-RegisterNetEvent('hotdog:assembleHotdog', function()
-
+-- ASSEMBLE HOTDOG
+RegisterNetEvent('hotdog:assemble', function()
     local src = source
 
     local bread = exports.ox_inventory:GetItemCount(src,'bread')
@@ -128,10 +137,10 @@ RegisterNetEvent('hotdog:assembleHotdog', function()
     else
 
         TriggerClientEvent('ox_lib:notify',src,{
-            description='Need bread and cooked sausage',
+            title='Assemble',
+            description='You need bread and cooked sausage',
             type='error'
         })
 
     end
-
 end)
