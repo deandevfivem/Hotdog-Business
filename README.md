@@ -1,5 +1,7 @@
 Required https://forum.cfx.re/t/free-mlo-chihuahua-hotdog-restaurant/5282182 
 
+Want more free script head over to (https://discord.gg/Z75wwvsDgs)
+
 # Hotdog-Business
 🌭 Hotdog Stand Script – ReadMe
 Overview
